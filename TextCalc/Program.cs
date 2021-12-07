@@ -5,6 +5,13 @@ namespace TextCalc {
 
     class Program {
 
+        private static String[] _oOperatorTokens = new String[] {
+            "> ADD",
+            "> SUBTRACT",
+            "> MULTIPLY BY",
+            "> DIVIDE BY"
+        };
+
         struct Operation {
 
             public readonly String Token;
@@ -33,13 +40,6 @@ namespace TextCalc {
                 }
             }
         }
-
-        private static String[] _oOperatorTokens = new String[] {
-            "> ADD",
-            "> SUBTRACT",
-            "> MULTIPLY BY",
-            "> DIVIDE BY"
-        };
 
         private static Boolean _ApplyOperation(String psLine) {
             foreach (var lsToken in _oOperatorTokens)
