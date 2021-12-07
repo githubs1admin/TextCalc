@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TextCalc {
 
@@ -16,53 +13,84 @@ namespace TextCalc {
         }
 
         struct Operation {
-            Operators Operator;
-            Double Value;
+
+            public readonly Operators Operator;
+            public readonly Double Value; 
+
+            public Operation(Operators pnOperator, Double pnValue)  {
+                Operator = pnOperator;
+                Value = pnValue;
+            }
+
         }
 
         private static Double _nMem;
-        private static Queue<Double> _oPartials = new Queue<Double>();
+        private static readonly Queue<Double> _oPartials = new Queue<Double>();
 
         static void Main(String[] _) {
             Boolean lbContinue = true;
-
             while (lbContinue) {
                 var lsLine = Console.ReadLine();
-                if (lsLine.ToLower() == "exit")
+                if (lsLine == "EXIT")
                     lbContinue = false;
-                else 
-                    _Parse(lsLine);
+                else
+                    try {
+                        _ParseLine(lsLine);
+                    } catch (Exception loException) {
+                        Console.WriteLine(loException.Message);
+                    }
             }
         }
-       
-        private static void _Parse(String psLine) {
-            Double lnValue;
-            //Operators lnOperator;
-            if (psLine.ToLower().StartsWith("multiply by")) {
-                //lnOperator = Operators.Multiply;
-                lnValue = Convert.ToDouble(psLine.Substring(11));
-                _nMem *= lnValue;
-                _oPartials.Enqueue(_nMem);
-            } else if (psLine.ToLower().StartsWith("subtract")) {
-                //lnOperator = Operators.Subtract;
-                lnValue = Convert.ToDouble(psLine.Substring(8));
-                _nMem -= lnValue;
-                _oPartials.Enqueue(_nMem);
-            } else if (psLine.ToLower().StartsWith("add")) {
-                //lnOperator = Operators.Add;
-                lnValue = Convert.ToDouble(psLine.Substring(3));
-                _nMem += lnValue;
-                _oPartials.Enqueue(_nMem);
-            } else if (psLine.ToLower().StartsWith("divide by")) {
-                //lnOperator = Operators.Divide;
-                lnValue = Convert.ToDouble(psLine.Substring(9));
-                _nMem /= lnValue;
-                _oPartials.Enqueue(_nMem);
-            } else if (psLine.ToLower().StartsWith("display"))
-                while (_oPartials.Count > 0) {
-                    _nMem = _oPartials.Dequeue();
-                    Console.WriteLine($"< {_nMem}");
-                }
+
+        private static void _ParseLine(String psLine) {
+            if (psLine.StartsWith("MULTIPLY BY"))
+                _ApplyOperation(new Operation(Operators.Multiply, _ParseValue(psLine, "MULTIPLY BY".Length)));
+            else if (psLine.StartsWith("SUBTRACT"))
+                _ApplyOperation(new Operation(Operators.Subtract, _ParseValue(psLine, 8)));
+            else if (psLine.StartsWith("ADD"))
+                _ApplyOperation(new Operation(Operators.Add, _ParseValue(psLine, 3)));
+            else if (psLine.StartsWith("DIVIDE BY"))
+                _ApplyOperation(new Operation(Operators.Divide, _ParseValue(psLine, 9)));
+            else if (psLine.StartsWith("DISPLAY"))
+                _ApplyCommand("DISPLAY");
+        }
+
+        private static Double _ParseValue(String psLine, Int32 pnTokenLength) {
+            try {
+                return Convert.ToDouble(psLine.Substring(pnTokenLength));
+            } catch {
+                throw new Exception("ERROR: while parsing value");
+            }
+        }
+
+        private static void _ApplyOperation(Operation poOperation) {
+            switch (poOperation.Operator) {
+                case Operators.Add:
+                    _nMem += poOperation.Value;
+                    break;
+                case Operators.Subtract:
+                    _nMem -= poOperation.Value;
+                    break;
+                case Operators.Multiply:
+                    _nMem *= poOperation.Value;
+                    break;
+                case Operators.Divide:
+                    _nMem /= poOperation.Value;
+                    break;
+            }
+
+            _oPartials.Enqueue(_nMem);
+        }
+
+        private static void _ApplyCommand(String psCommand) {
+            switch (psCommand) {
+                case "DISPLAY":
+                    while (_oPartials.Count > 0) {
+                        _nMem = _oPartials.Dequeue();
+                        Console.WriteLine($"< {_nMem}");
+                    }
+                    break;
+            }
         }
 
     }
